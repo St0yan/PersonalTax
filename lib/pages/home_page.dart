@@ -7,6 +7,7 @@ import '../widgets/shift_details_card.dart';
 import '../widgets/animated_drawer_header.dart';
 import 'search_station_page.dart';
 import 'special_days_page.dart';
+import '../services/sync_service.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});

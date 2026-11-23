@@ -2,6 +2,7 @@ import 'package:personal_tax/pages/home_page.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import '../models/shift.dart';
+import '../services/sync_service.dart';
 
 class DBHelper {
   static final DBHelper instance = DBHelper._init();
@@ -66,28 +67,34 @@ class DBHelper {
   // ---------- INSERT ----------
   Future<int> insertShift(Shift shift) async {
     final db = await instance.database;
-    return await db.insert('shifts', shift.toMap());
+
+    final result = await db.insert('shifts', shift.toMap());
+
+    await SyncService.syncToCloud();
+
+    return result;
   }
 
   // ---------- UPDATE ----------
   Future<int> updateShift(Shift shift) async {
     final db = await instance.database;
-    return await db.update(
-      'shifts',
-      shift.toMap(),
-      where: 'id = ?',
-      whereArgs: [shift.id],
-    );
+
+    final result = await db.update('shifts', shift.toMap(), where: 'id = ?', whereArgs: [shift.id]);
+
+    await SyncService.syncToCloud();
+
+    return result;
   }
 
   // ---------- DELETE ----------
   Future<int> deleteShift(int id) async {
     final db = await instance.database;
-    return await db.delete(
-      'shifts',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
+
+    final result = await db.delete('shifts', where: 'id = ?', whereArgs: [id]);
+
+    await SyncService.deleteShiftFromCloud(id);
+
+    return result;
   }
 
   // ---------- GET BY DATE ----------
@@ -178,6 +185,8 @@ class DBHelper {
         conflictAlgorithm: ConflictAlgorithm.replace,
       );
     }
+
+    await SyncService.syncToCloud();
   }
 
   Future<void> addSickRange(DateTime start, int days) async {
@@ -206,6 +215,8 @@ class DBHelper {
         conflictAlgorithm: ConflictAlgorithm.replace,
       );
     }
+
+    await SyncService.syncToCloud();
   }
 
   Future<List<Map<String, dynamic>>> getSpecialDaysForMonth(int month, int year) async {
@@ -229,19 +240,23 @@ class DBHelper {
       where: 'date = ?',
       whereArgs: [date],
     );
+
+    await SyncService.deleteSpecialDayFromCloud(date);
   }
 
-  Future<List<Map<String, dynamic>>> getAbsencesForMonth(int month, int year) async {
-    final db = await database;
+  Future<bool> isDatabaseEmpty() async {
+  final db = await database;
 
-    final result = await db.rawQuery('''
-      SELECT * FROM absences
-      WHERE strftime('%m', date) = ? AND strftime('%Y', date) = ?
-    ''', [
-      month.toString().padLeft(2, '0'),
-      year.toString(),
-    ]);
+  final shiftsCount =
+      Sqflite.firstIntValue(
+        await db.rawQuery('SELECT COUNT(*) FROM shifts'),
+      ) ?? 0;
 
-    return result;
-  }
+  final specialDaysCount =
+      Sqflite.firstIntValue(
+        await db.rawQuery('SELECT COUNT(*) FROM special_days'),
+      ) ?? 0;
+
+  return shiftsCount == 0 && specialDaysCount == 0;
+}
 }

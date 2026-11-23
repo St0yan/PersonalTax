@@ -175,6 +175,7 @@ class _EditShiftPageState extends State<EditShiftPage> {
                 TextFormField(
                   controller: destinationController,
                   decoration: InputDecoration(labelText: "Дестинация"),
+                  textCapitalization: TextCapitalization.sentences,
                 ),
 
                 TextFormField(

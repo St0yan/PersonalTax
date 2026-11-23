@@ -19,19 +19,6 @@ class _SpecialDaysPageState extends State<SpecialDaysPage> {
 
   Map<DateTime, List<Map<String, dynamic>>> absencesByDay = {};
 
-  Future<void> loadAbsences() async {
-    final data = await DBHelper.instance.getAbsencesForMonth(currentMonth, currentYear);
-
-    absencesByDay.clear();
-
-    for (var row in data) {
-      final date = DateTime.parse(row['date']);
-      absencesByDay.putIfAbsent(date, () => []).add(row);
-    }
-
-    setState(() {});
-  }
-
   @override
   void initState() {
     super.initState();

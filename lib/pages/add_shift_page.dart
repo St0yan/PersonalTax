@@ -164,6 +164,7 @@ class _AddShiftPageState extends State<AddShiftPage> {
                 TextFormField(
                   controller: destinationController,
                   decoration: InputDecoration(labelText: "Дестинация", suffixIcon: Icon(Icons.location_on)),
+                  textCapitalization: TextCapitalization.sentences,
                 ),
 
                 // START TIME

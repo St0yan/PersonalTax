@@ -12,6 +12,8 @@ import 'services/notification_service.dart';
 import 'package:provider/provider.dart';
 import 'providers/theme_provider.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'services/sync_service.dart';
 
 final FlutterLocalNotificationsPlugin notificationsPlugin =
     FlutterLocalNotificationsPlugin();
@@ -19,6 +21,13 @@ final FlutterLocalNotificationsPlugin notificationsPlugin =
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  await Supabase.initialize(
+    url: 'https://fetpntthxgpqkvglacyx.supabase.co',
+    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZldHBudHRoeGdwcWt2Z2xhY3l4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTU0NDg3NzcsImV4cCI6MjExMTAyNDc3N30.4-zeZYxvTtrV7a2DcHqqBAF2_s2fJnPbat6cMapL-DM',
+  );
+
+  await SyncService.autoRestoreIfNeeded();
+  
   tz.initializeTimeZones();
   tz.setLocalLocation(tz.getLocation('Europe/Sofia'));
 
